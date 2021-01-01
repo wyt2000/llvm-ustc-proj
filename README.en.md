@@ -1,6 +1,6 @@
 # Compiler Group
 
-## Members：Yifei Liu,Yiming Sun,Yutong Wu,Wen Fan
+## Members：Wen Fan,Yiming Sun,Yutong Wu,Yifei Liu
 
 #### Note: the contents below are lab document
 
