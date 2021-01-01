@@ -40,6 +40,8 @@
 #include <vector>
 #include <set>
 
+#define tab(n) for(int i = 0; i < n; i++) llvm::outs() << "\t";
+
 using namespace llvm;
 
 #define DEBUG_TYPE "loop-search"
@@ -63,22 +65,58 @@ struct LSPass : public FunctionPass {
     if (skipFunction(F))
       return false;
     size_t BackEdgeNum = 0;
+    size_t LoopDepth   = 0;
+    std::vector<size_t> LoopID;
+		LoopID.push_back(0);
+		
     DominatorTree DT(F);
     PostDominatorTree PDT(F);
     std::vector<DomTreeNode*> WorkList;
     WorkList.push_back(DT.getRootNode());
+    llvm::outs() << "{\n";
     while(!WorkList.empty()){
       auto CurNode = WorkList.back();
       WorkList.pop_back();
       auto BB = CurNode->getBlock();
-      for(auto sSucc = succ_begin(BB), eSucc = succ_end(BB);sSucc != eSucc; ++sSucc){
-        auto SuccNode = DT.getNode(*sSucc);
-        if(DT.dominates(SuccNode, CurNode)){
-          BackEdgeNum++;
+    	//llvm::outs() << "======== " << BB->getName() << " ========" << "\n";
+
+      for(auto sPred = pred_begin(BB), ePred = pred_end(BB);sPred != ePred; ++sPred){
+        auto PredNode = DT.getNode(*sPred);
+        //llvm::outs() << "pred: " << PredNode->getBlock()->getName() << "\n";
+        if(DT.dominates(CurNode, PredNode)){
+					BackEdgeNum++;
+          LoopDepth++;
+          if(LoopID.size() <= LoopDepth) {
+						LoopID.push_back(0);
+					}
+					LoopID[LoopDepth - 1]++;
+					tab(LoopDepth);
+					llvm::outs() << "\"L";
+					for(int i = 0; i < LoopDepth; i++) {
+						llvm::outs() << LoopID[i];
+					}
+					llvm::outs() << "\" : {\n";
+					tab(LoopDepth + 1);
+					llvm::outs() << "\"depth\" : " << LoopDepth << "\n";
         }
       }
-      WorkList.insert(WorkList.end(), CurNode->begin(), CurNode->end());
+
+      for(auto sSucc = succ_begin(BB), eSucc = succ_end(BB);sSucc != eSucc; ++sSucc){
+        auto SuccNode = DT.getNode(*sSucc);
+        //llvm::outs() << "succ: " << SuccNode->getBlock()->getName() << "\n";
+        if(DT.dominates(SuccNode, CurNode)){
+					LoopID[LoopDepth] = 0;
+					tab(LoopDepth);
+					llvm::outs() << "}\n";
+          LoopDepth--;
+        }
+      }
+
+      std::vector<DomTreeNode*> v = std::vector<DomTreeNode*>(CurNode->begin(), CurNode->end());
+      std::reverse(v.begin(), v.end());
+      WorkList.insert(WorkList.end(), v.begin(), v.end());
     }
+    llvm::outs() << "}\n";
     llvm::outs() << "Processing function " << F.getName() << ", number of Backedges is " << BackEdgeNum << "\n";
     std::error_code err;
     raw_fd_ostream outfile_dt(StringRef(F.getName().str() + "_dt.txt"), err);
