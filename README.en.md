@@ -1,3 +1,9 @@
+# Compiler Group
+
+## Members：Yifei Liu，Yiming Sun，Yutong Wu，Wen Fan
+
+#### Note: the contents below are lab document
+
 # LLVM-USTC Practical Project
 
 #### Introduction
