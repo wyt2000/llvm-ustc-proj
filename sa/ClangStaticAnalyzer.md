@@ -243,7 +243,7 @@ void foo() {
   }
 ```
 
-**不能处理按位运算**
+- **不能处理按位运算**
 
   ```c
   int main (int argc, char **argv)
