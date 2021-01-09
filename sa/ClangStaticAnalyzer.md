@@ -242,9 +242,7 @@ void foo() {
            delete pi;          // bug report: potential leakage
   }
   ```
-```
-  
-- **不能处理按位运算**
+**不能处理按位运算**
 
   ```c
   int main (int argc, char **argv)
@@ -260,7 +258,7 @@ void foo() {
   
     return 0;
   }
-```
+  ```
 
 - 除了这些缺陷以外, clang静态分析器还有哪些缺陷?
 
@@ -321,3 +319,5 @@ sa/
 # 参考
 
 某人写的CSA源码分析的文章, 可以看看 [link](http://blog.csdn.net/dashuniuniu?viewmode=contents), [知乎](https://www.zhihu.com/question/46358643#answer-49189748)
+
+```
