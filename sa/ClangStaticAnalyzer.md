@@ -234,14 +234,15 @@ void foo(double f) {
 
 - **不能处理多次循环**：当前分析器简单地将每个循环展开`N`(比较小的整数) 次
 
-  ```c++
+```c++
 void foo() {
    int *pi = new int;
  for (int i = 0; i < 3; i++) // if replace 3 with 100, no bug report
        if (i == 1000)
            delete pi;          // bug report: potential leakage
   }
-  ```
+```
+
 **不能处理按位运算**
 
   ```c
@@ -319,5 +320,7 @@ sa/
 # 参考
 
 某人写的CSA源码分析的文章, 可以看看 [link](http://blog.csdn.net/dashuniuniu?viewmode=contents), [知乎](https://www.zhihu.com/question/46358643#answer-49189748)
+
+```
 
 ```
