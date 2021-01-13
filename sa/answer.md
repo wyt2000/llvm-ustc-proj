@@ -92,9 +92,15 @@ int z = *(p + 1);
 
 4. 函数`SimpleStreamChecker::checkPointerEscape`的逻辑是怎样的？实现了什么功能？用在什么地方？
 
-   - 首先调用  guaranteedNotToCloseFile 判断函数调用 Call 是否会导致文件关闭，如果不会，则不需要继续处理。否则默认这些传递到函数的符号已经在某个地方被关闭了，将它们从 StreamMap 中删去。
-   - 实现了当被追踪的文件指针由于函数调用而 escape 的时候，不在子函数中继续追踪它。
-   - 用在函数调用的时候。
+   在 llvm [checker_dev_manual](https://clang-analyzer.llvm.org/checker_dev_manual.html) 中有如下内容：
+
+   >The check should conservatively assume that the program is correct when a tracked symbol is passed to **a function that is unknown to the analyzer**.  `checkPointerEscape` callback could help you handle that case.
+
+   即遇到分析器未知的函数时，会自动调用 checkPointerEscape 。
+
+   - 逻辑：首先调用  guaranteedNotToCloseFile 判断函数调用 Call 是否会导致文件关闭，如果不会，则不需要继续处理。否则默认这些传递到未知函数的符号已经在某个地方被关闭了，将它们从 StreamMap 中删去。
+   - 实现了当被追踪的文件指针由于调用未知函数而 escape 的时候，不在子函数中继续追踪它。
+   - 用在调用分析器未知函数的时候，如只在本文件中声明而未在本文件中定义的函数。
 
 5. 根据以上认识，你认为这个简单的checker能够识别出怎样的bug？又有哪些局限性？请给出测试程序及相关的说明。
 
@@ -112,11 +118,7 @@ int z = *(p + 1);
          return fopen(file, "r");
      }
      
-     void f1(FILE *f)
-     {
-         // do something...
-         exit(0);
-     }
+     void f1(FILE *f);
      
      int main()
      {
@@ -125,9 +127,9 @@ int z = *(p + 1);
          return 0;
      }
      ```
-
-     该程序不会警告，因为在调用 f1(f) 的时候在 f1 的状态集合中删掉了 f，导致 f1 结束时不会检查 f 指向的文件是否关闭，导致资源泄漏。
-
+     
+     该程序不会警告，因为在调用 f1(f) 的时候在状态集合中删掉了 f，导致不会检查 f 指向的文件是否关闭，导致资源泄漏。
+     
    - 变量生存期结束时才检查是否有没有关闭的文件，无法处理全局变量重复赋值导致的资源泄露。
 
      测试程序：
