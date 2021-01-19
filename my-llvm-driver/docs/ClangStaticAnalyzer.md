@@ -168,8 +168,6 @@ void foo() {
            delete pi;          // bug report: potential leakage
   }
   ```
-```
-  
 - **不能处理按位运算**
 
   ```c
@@ -186,8 +184,7 @@ void foo() {
   
     return 0;
   }
-```
-
+  ```
 - 除了这些缺陷以外, clang静态分析器还有哪些缺陷?
 
 - 以动态内存、或文件等资源有关的缺陷检查为例，对clang 静态分析器进行如下使用和分析工作：
