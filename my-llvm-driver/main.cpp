@@ -1,5 +1,6 @@
 
 // #include "clang/Frontend/FrontendDiagnostic.h"
+#define _CHECKER_DEBUG
 #include "clang/Frontend/TextDiagnosticPrinter.h"
 #include "clang/Basic/TargetInfo.h"
 
@@ -52,17 +53,19 @@ int main(int argc, const char **argv) {
     llvm::errs() << "Failed. Early return.\n";
     exit(1);
   }
-  
-  TheDriver.FrontendCodeGen();
   TheDriver.runChecker();
+#ifndef _CHECKER_DEBUG  
+  TheDriver.FrontendCodeGen();
   TheDriver.InitializePasses();
   TheDriver.addPass(createPromoteMemoryToRegisterPass());
   TheDriver.addPass(createLSPass());
   TheDriver.addPass(createmyDCEPass());
   TheDriver.addPass(createmyGlobalPass());
   TheDriver.run();
+#endif
   // TheDriver.printASTUnit();
   // Shutdown.
+
   llvm::llvm_shutdown();
   return 0;
 }
