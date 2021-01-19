@@ -23,7 +23,9 @@ add_executable(${PROJECT_NAME}
     main.cpp
     src/Driver/driver.cpp
     src/Checker/myAnalysisAction.cpp
-    src/Checker/SimpleDivZeroChecker.cpp)
+    src/Checker/SimpleDivZeroChecker.cpp
+    src/Checker/SimpleStreamChecker.cpp
+    )
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     clangBasic

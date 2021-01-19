@@ -5,6 +5,7 @@
 #include "clang/StaticAnalyzer/Core/AnalyzerOptions.h"
 
 #include "Checker/SimpleDivZeroChecker.h"
+#include "Checker/SimpleStreamChecker.h"
 // TODO: include你编写的Checker的头文件
 
 
@@ -20,6 +21,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
 
   
   addChecker<SimpleDivChecker>(CI, AnalysisConsumer.get(), "H2020.SimpleDivChecker");
+  addChecker<SimpleStreamChecker>(CI, AnalysisConsumer.get(), "H2020.SimpleStreamChecker");
   // TODO: 在这里按照上面的示例调用addChecker函数添加自己编写的Checker
 
 
