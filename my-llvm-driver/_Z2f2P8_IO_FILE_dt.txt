@@ -1,4 +1,0 @@
-=============================--------------------------------
-Inorder Dominator Tree: DFSNumbers invalid: 0 slow queries.
-  [1] %entry {4294967295,4294967295} [0]
-Roots: %entry 
