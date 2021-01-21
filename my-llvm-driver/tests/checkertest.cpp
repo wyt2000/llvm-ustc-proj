@@ -1,7 +1,9 @@
+void f(int n) {
+    int a =  1 / (n - 1);
+    return ;
+}
 int main()
 {
-    int a = 1;
-    int b = 2;
-    int c = a / (-b);
+    f(0);
     return 0;
 }

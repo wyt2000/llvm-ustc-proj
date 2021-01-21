@@ -5,8 +5,6 @@
 using namespace clang;
 using namespace ento;
 
-
-
 static const Expr *getDenomExpr(const ExplodedNode *N) {
   const Stmt *S = N->getLocationAs<PreStmt>()->getStmt();
   if (const auto *BE = dyn_cast<BinaryOperator>(S))
@@ -19,7 +17,7 @@ void SimpleDivChecker::reportBug(
     std::unique_ptr<BugReporterVisitor> Visitor) const {
   if (ExplodedNode *N = C.generateErrorNode(StateZero)) {
     if (!BT)
-      BT.reset(new BuiltinBug(this, "Division by non-negative"));
+      BT.reset(new BuiltinBug(this, "Division by negative"));
 
     auto R = std::make_unique<PathSensitiveBugReport>(*BT, Msg, N);
     R->addVisitor(std::move(Visitor));
@@ -42,41 +40,34 @@ void SimpleDivChecker::checkPreStmt(const BinaryOperator *B,
 
   SVal Denom = C.getSVal(B->getRHS());
   Optional<NonLoc> NL = Denom.getAs<NonLoc>();
-  if(!NL)
+  if(!NL || NL->getSubKind() != nonloc::ConcreteIntKind)
     return;
+  
+  const auto &Value = NL->castAs<nonloc::ConcreteInt>().getValue();
+  if(!Value.isSigned()) {
+    return;
+  }
+  unsigned Width =  Value.getBitWidth();
+
   ConstraintManager &CM = C.getConstraintManager();
   ProgramStateRef stateNegaive, stateNonNegative;
-  std::tie(stateNegaive, stateNonNegative) = CM.assumeInclusiveRangeDual(C.getState(), *NL, llvm::APSInt::get(0), llvm::APSInt::get(65536));
+  std::tie(stateNegaive, stateNonNegative) = CM.assumeInclusiveRangeDual(C.getState(), 
+                                                                        *NL, 
+                                                                        llvm::APSInt(llvm::APInt(Width, 0), false),
+                                                                        llvm::APSInt::getMaxValue(Width, false)
+                                                                        );
   
   if (!stateNegaive) {
     assert(stateNonNegative);
-    reportBug("Division by non-negative", stateNonNegative, C);
+    reportBug("Division by negative", stateNonNegative, C);
     return;
   }
 
   C.addTransition(stateNegaive);
-
-/* 
-  Optional<DefinedSVal> DV = Denom.getAs<DefinedSVal>();
-
-  // Divide-by-undefined handled in the generic checking for uses of
-  // undefined values.
-  if (!DV)
-    return;
-
-  // Check for divide by zero.
-  ConstraintManager &CM = C.getConstraintManager();
-  ProgramStateRef stateNotZero, stateZero;
-  std::tie(stateNotZero, stateZero) = CM.assumeDual(C.getState(), *DV);
-
-  if (!stateNotZero) {
-    assert(stateZero);
-    reportBug("Division by zero", stateZero, C);
-    return;
-  }
-
-  // If we get here, then the denom should not be zero. We abandon the implicit
-  // zero denom case for now.
-  C.addTransition(stateNotZero);
-*/
 }
+
+/*  TODO:
+  * 1. global variable
+  * 2. float
+  * 3. non-ConcreteIntKind ?
+*/
