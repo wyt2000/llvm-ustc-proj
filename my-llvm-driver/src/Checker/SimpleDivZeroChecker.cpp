@@ -1,4 +1,6 @@
 #include "Checker/SimpleDivZeroChecker.h"
+#include <iostream>
+#include <limits.h>
 
 using namespace clang;
 using namespace ento;
@@ -17,7 +19,7 @@ void SimpleDivChecker::reportBug(
     std::unique_ptr<BugReporterVisitor> Visitor) const {
   if (ExplodedNode *N = C.generateErrorNode(StateZero)) {
     if (!BT)
-      BT.reset(new BuiltinBug(this, "Division by zero"));
+      BT.reset(new BuiltinBug(this, "Division by non-negative"));
 
     auto R = std::make_unique<PathSensitiveBugReport>(*BT, Msg, N);
     R->addVisitor(std::move(Visitor));
@@ -39,6 +41,22 @@ void SimpleDivChecker::checkPreStmt(const BinaryOperator *B,
     return;
 
   SVal Denom = C.getSVal(B->getRHS());
+  Optional<NonLoc> NL = Denom.getAs<NonLoc>();
+  if(!NL)
+    return;
+  ConstraintManager &CM = C.getConstraintManager();
+  ProgramStateRef stateNegaive, stateNonNegative;
+  std::tie(stateNegaive, stateNonNegative) = CM.assumeInclusiveRangeDual(C.getState(), *NL, llvm::APSInt::get(0), llvm::APSInt::get(65536));
+  
+  if (!stateNegaive) {
+    assert(stateNonNegative);
+    reportBug("Division by non-negative", stateNonNegative, C);
+    return;
+  }
+
+  C.addTransition(stateNegaive);
+
+/* 
   Optional<DefinedSVal> DV = Denom.getAs<DefinedSVal>();
 
   // Divide-by-undefined handled in the generic checking for uses of
@@ -60,4 +78,5 @@ void SimpleDivChecker::checkPreStmt(const BinaryOperator *B,
   // If we get here, then the denom should not be zero. We abandon the implicit
   // zero denom case for now.
   C.addTransition(stateNotZero);
+*/
 }
