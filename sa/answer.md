@@ -66,6 +66,53 @@ int *p = &x;
 int z = *(p + 1);
 ```
 
+### 2.3 简要阅读[LLVM Programmer's Manual](http://llvm.org/releases/11.0.0/docs/ProgrammersManual.html)和[LLVM Coding Standards](http://llvm.org/releases/11.0.0/docs/CodingStandards.html)
+
+回答下面的问题：
+
+1. LLVM 大量使用了 C++11/14的智能指针，请简要描述几种智能指针的特点、使用场合，如有疑问也可以记录在报告中.
+
+   - unique_ptr
+     - 特点：unique_ptr“唯一”拥有其所指对象，同一时刻只能有一个unique_ptr指向给定对象
+     - 使用场合：需要唯一指向给定对象时，使用 unique_ptr
+   - shared_ptr
+     - 特点：shared_ptr多个指针指向相同的对象。shared_ptr使用引用计数，每一个shared_ptr的拷贝都指向相同的内存。每使用他一次，内部的引用计数加1，每析构一次，内部的引用计数减1，减为0时，自动删除所指向的堆内存
+     - 使用场合：需要多个指针共同指向同一对象时，使用 shared_ptr
+   - weak_ptr
+     - 特点：weak_ptr是为了配合shared_ptr而引入的一种智能指针，因为它不具有普通指针的行为，没有重载operator*和->,它的最大作用在于协助shared_ptr工作，像旁观者那样观测资源的使用情况。weak_ptr可以从一个shared_ptr或者另一个weak_ptr对象构造，获得资源的观测权。但weak_ptr没有共享资源，它的构造不会引起指针引用计数的增加。
+     - 使用场合：配合 shared_ptr 使用
+
+2. LLVM 不使用 C++ 的运行时类型推断（RTTI），理由是什么？LLVM 提供了怎样的机制来代替它？
+
+   **理由：**C++中RTTI有一些缺点，比如 dynamic_cast<> 运算符只能工作在有 v-table 的类上。
+
+   ```
+   手册原文：These templates have many similarities to the C++ `dynamic_cast<>` operator, but they don’t have some drawbacks (primarily stemming from the fact that `dynamic_cast<>` only works on classes that have a v-table). 
+   ```
+
+   **代替的机制：**使用 isa<>,cast<>,dyn_cast<>等等模板类，位于`llvm/Support/Casting.h` ([doxygen](https://llvm.org/doxygen/Casting_8h_source.html)) 文件中
+
+   - `isa<>`：类似 Java 中的 instanceof 运算符，返回一个指针或引用是否是一个类型的实例，返回 True/False
+
+   - `cast<>`：“检查转换”操作。它将指针或引用从基类转换为派生类，如果不是正确类型的实例，则会导致 assertion failure
+
+   - `dyn_cast<>`：检查转换操作。它检查操作数是否为指定的类型，如果是，则返回指向它的指针（此运算符不适用于引用）。如果操作数的类型不正确，则返回空指针。
+
+   - 此外，还有`isa_and_nonnull<>` `cast_or_null<>` `dyn_cast_or_null<>` 模板类。
+
+3. 如果你想写一个函数，它的参数既可以是数组，也可以是std::vector，那么你可以声明该参数为什么类型？如果你希望同时接受 C 风格字符串和 std::string 呢？
+
+   **数组与 std::vector**：可以将参数声明为 `llvm::ArrayRef` 类（在`llvm/ADT/ArrayRef.h` 中）。此类常用于需要接收并读取内存中连续元素列表的API中，这样的 API 可以传递固定大小的数组和 std::vector 
+
+   **C 风格字符串和 std::string**：可以将参数声明为 `StringRef` 类，它包含了一个指向字符的指针和长度。
+
+   ```
+   原文：StringRef is ideal for passing simple strings around that are known to be live, either because they are C string literals, std::string, a C array, or a SmallVector. Each of these cases has an efficient implicit conversion to StringRef, which doesn’t result in a dynamic strlen being executed
+   ```
+
+4. 你有时会在cpp文件中看到匿名命名空间的使用，这是出于什么考虑？
+
+   编译器会为匿名命名空间生成一个唯一的名字（*_UNIQUE_NAME*），再加上一条using指令，并将在匿名命名空间声明的名称都与*_UNIQUE_NAME* 绑定在一起。这使得这些名称具有 internal 链接属性，和声明为static的全局名称的链接属性是相同的，即名称的作用域被限制在当前文件中，无法通过在另外的文件中使用extern声明来进行链接。C++ 新的标准中提倡使用命名空间，而不推荐使用 static，因为 static 的含义随使用场合不同而不同，容易造成混淆。
 
 ### 2.4 阅读[`clang/lib/StaticAnalyzer/Checkers/SimpleStreamChecker.cpp`](https://github.com/llvm/llvm-project/tree/llvmorg-11.0.0/clang/lib/StaticAnalyzer/Checkers/SimpleStreamChecker.cpp)
 
