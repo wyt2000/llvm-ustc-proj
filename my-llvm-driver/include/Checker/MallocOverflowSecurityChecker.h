@@ -27,6 +27,9 @@
 #include "clang/StaticAnalyzer/Core/PathSensitive/AnalysisManager.h"
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/SmallVector.h"
+#include "clang/StaticAnalyzer/Core/PathSensitive/CheckerContext.h"
+#include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
+#include "clang/StaticAnalyzer/Core/PathSensitive/CallEvent.h"
 #include <utility>
 
 using llvm::APSInt;
@@ -46,77 +49,13 @@ struct MallocOverflowCheck {
 
 };
 
-class MallocOverflowSecurityChecker : public Checker<check::ASTCodeBody> {
+class MallocOverflowSecurityChecker : public Checker<check::PreStmt<CallExpr>> {
 
     public:
-    void checkASTCodeBody(const Decl *D, AnalysisManager &mgr,
-                        BugReporter &BR) const;
+    mutable std::unique_ptr<BugType> BT;
+    // check the argument before call function statement.(on AST)
+    void checkPreStmt(const CallExpr *CE,CheckerContext &C) const;
 
-    void CheckMallocArgument(
-        SmallVectorImpl<MallocOverflowCheck> &PossibleMallocOverflows,
-        const Expr *TheArgument, ASTContext &Context) const;
-
-    void OutputPossibleOverflows(
-        SmallVectorImpl<MallocOverflowCheck> &PossibleMallocOverflows,
-        const Decl *D, BugReporter &BR, AnalysisManager &mgr) const;
-
-};
-
-//} // end anonymous namespace
-//}
-
-// Return true for computations which evaluate to zero: e.g., mult by 0.
-static inline bool EvaluatesToZero(APSInt &Val, BinaryOperatorKind op) {
-  return (op == BO_Mul) && (Val == 0);
-}
-
-// A worker class for OutputPossibleOverflows.
-class CheckOverflowOps : public EvaluatedExprVisitor<CheckOverflowOps> {
-    public:
-        typedef SmallVectorImpl<MallocOverflowCheck> theVecType;
-
-    private:
-        theVecType &toScanFor;
-        ASTContext &Context;
-
-    bool isIntZeroExpr(const Expr *E) const;
-
-    static const Decl *getDecl(const DeclRefExpr *DR) { return DR->getDecl(); }
-    static const Decl *getDecl(const MemberExpr *ME) {
-      return ME->getMemberDecl();
-    }
-
-    template <typename T1>
-    void Erase(const T1 *DR,
-               llvm::function_ref<bool(const MallocOverflowCheck &)> Pred);
-
-    void CheckExpr(const Expr *E_p);
-
-    // Check if the argument to malloc is assigned a value
-    // which cannot cause an overflow.
-    // e.g., malloc (mul * x) and,
-    // case 1: mul = <constant value>
-    // case 2: mul = a/b, where b > x
-    void CheckAssignmentExpr(BinaryOperator *AssignEx);
-  public:
-    void VisitBinaryOperator(BinaryOperator *E);
-
-    /* We specifically ignore loop conditions, because they're typically
-     not error checks.  */
-    void VisitWhileStmt(WhileStmt *S) {
-      return this->Visit(S->getBody());
-    }
-    void VisitForStmt(ForStmt *S) {
-      return this->Visit(S->getBody());
-    }
-    void VisitDoStmt(DoStmt *S) {
-      return this->Visit(S->getBody());
-    }
-
-    CheckOverflowOps(theVecType &v, ASTContext &ctx)
-    : EvaluatedExprVisitor<CheckOverflowOps>(ctx),
-      toScanFor(v), Context(ctx)
-    { }
 };
 
 // end of namespace
