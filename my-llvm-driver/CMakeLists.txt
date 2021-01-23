@@ -26,11 +26,8 @@ add_executable(${PROJECT_NAME}
     src/Checker/SimpleDivZeroChecker.cpp
     src/Checker/SimpleStreamChecker.cpp
     src/Checker/MallocOverflowSecurityChecker.cpp
-<<<<<<< HEAD
     src/Checker/CStringChecker.cpp
-=======
     src/Checker/NewZeroChecker.cpp
->>>>>>> 614aaafc036ba0f7f70dd93a60a9bf0f52a0b9f2
     )
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
