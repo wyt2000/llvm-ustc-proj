@@ -1,5 +1,6 @@
 #include <string.h>
 void test() {
-  const char* s1;
-  int a = strlen(s1);
+  char s1[] = "123";
+  char s2[] = "1234567";
+  strcpy(s1, s2);
 }

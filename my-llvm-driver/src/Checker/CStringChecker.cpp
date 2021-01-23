@@ -1,4 +1,5 @@
 #include "Checker/CStringChecker.h"
+#include "iostream"
 
 using namespace clang;
 using namespace ento;
@@ -40,7 +41,6 @@ ProgramStateRef CStringChecker::checkNonNull(CheckerContext &C,
       OS << "Null pointer passed as " << (Arg.ArgumentIndex + 1)
          << llvm::getOrdinalSuffix(Arg.ArgumentIndex + 1) << " argument to "
          << CurrentFunctionDescription;
-
       emitNullArgBug(C, stateNull, Arg.Expression, OS.str());
     }
     return nullptr;
@@ -280,8 +280,7 @@ void CStringChecker::emitOverlapBug(CheckerContext &C, ProgramStateRef state,
     return;
 
   if (!BT_Overlap)
-    BT_Overlap.reset(new BugType(Filter.CheckNameCStringBufferOverlap,
-                                 categories::UnixAPI, "Improper arguments"));
+    BT_Overlap.reset(new BuiltinBug(this, "Improper arguments"));
 
   // Generate a report for this bug.
   auto report = std::make_unique<PathSensitiveBugReport>(
@@ -297,8 +296,7 @@ void CStringChecker::emitNullArgBug(CheckerContext &C, ProgramStateRef State,
   if (ExplodedNode *N = C.generateErrorNode(State)) {
     if (!BT_Null)
       BT_Null.reset(new BuiltinBug(
-          Filter.CheckNameCStringNullArg, categories::UnixAPI,
-          "Null pointer argument in call to byte string function"));
+          this, "Null pointer argument in call to byte string function"));
 
     BuiltinBug *BT = static_cast<BuiltinBug *>(BT_Null.get());
     auto Report = std::make_unique<PathSensitiveBugReport>(*BT, WarningMsg, N);
@@ -314,11 +312,7 @@ void CStringChecker::emitOutOfBoundsBug(CheckerContext &C,
                                         StringRef WarningMsg) const {
   if (ExplodedNode *N = C.generateErrorNode(State)) {
     if (!BT_Bounds)
-      BT_Bounds.reset(new BuiltinBug(
-          Filter.CheckCStringOutOfBounds ? Filter.CheckNameCStringOutOfBounds
-                                         : Filter.CheckNameCStringNullArg,
-          "Out-of-bound array access",
-          "Byte string function accesses out-of-bound array element"));
+      BT_Bounds.reset(new BuiltinBug(this, "Out-of-bound array access"));
 
     BuiltinBug *BT = static_cast<BuiltinBug *>(BT_Bounds.get());
 
@@ -336,9 +330,7 @@ void CStringChecker::emitNotCStringBug(CheckerContext &C, ProgramStateRef State,
                                        StringRef WarningMsg) const {
   if (ExplodedNode *N = C.generateNonFatalErrorNode(State)) {
     if (!BT_NotCString)
-      BT_NotCString.reset(new BuiltinBug(
-          Filter.CheckNameCStringNotNullTerm, categories::UnixAPI,
-          "Argument is not a null-terminated string."));
+      BT_NotCString.reset(new BuiltinBug(this, "Argument is not a null-terminated string."));
 
     auto Report =
         std::make_unique<PathSensitiveBugReport>(*BT_NotCString, WarningMsg, N);
@@ -353,8 +345,7 @@ void CStringChecker::emitAdditionOverflowBug(CheckerContext &C,
   if (ExplodedNode *N = C.generateErrorNode(State)) {
     if (!BT_NotCString)
       BT_NotCString.reset(
-          new BuiltinBug(Filter.CheckNameCStringOutOfBounds, "API",
-                         "Sum of expressions causes overflow."));
+          new BuiltinBug(this, "Sum of expressions causes overflow."));
 
     // This isn't a great error message, but this should never occur in real
     // code anyway -- you'd have to create a buffer longer than a size_t can
@@ -2168,25 +2159,3 @@ void CStringChecker::checkDeadSymbols(SymbolReaper &SR,
   state = state->set<CStringLength>(Entries);
   C.addTransition(state);
 }
-
-void ento::registerCStringModeling(CheckerManager &Mgr) {
-  Mgr.registerChecker<CStringChecker>();
-}
-
-bool ento::shouldRegisterCStringModeling(const CheckerManager &mgr) {
-  return true;
-}
-
-#define REGISTER_CHECKER(name)                                                 \
-  void ento::register##name(CheckerManager &mgr) {                             \
-    CStringChecker *checker = mgr.getChecker<CStringChecker>();                \
-    checker->Filter.Check##name = true;                                        \
-    checker->Filter.CheckName##name = mgr.getCurrentCheckerName();             \
-  }                                                                            \
-                                                                               \
-  bool ento::shouldRegister##name(const CheckerManager &mgr) { return true; }
-
-REGISTER_CHECKER(CStringNullArg)
-REGISTER_CHECKER(CStringOutOfBounds)
-REGISTER_CHECKER(CStringBufferOverlap)
-REGISTER_CHECKER(CStringNotNullTerm)

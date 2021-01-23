@@ -97,6 +97,17 @@ namespace ento {
         CheckerNameRef CheckNameCStringOutOfBounds;
         CheckerNameRef CheckNameCStringBufferOverlap;
         CheckerNameRef CheckNameCStringNotNullTerm;
+
+        CStringChecksFilter() {
+            CheckCStringNullArg                     = true;
+            CheckCStringOutOfBounds                 = true;
+            CheckCStringBufferOverlap               = true;
+            CheckCStringNotNullTerm                 = true;
+            //CheckNameCStringNullArg                 = CheckerNameRef(StringRef("CStringNullArg"));
+            //CheckNameCStringOutOfBounds             = CheckerNameRef(StringRef("CStringOutOfBounds"));
+            //CheckNameCStringBufferOverlap           = CheckerNameRef(StringRef("CStringBufferOverlap"));
+            //CheckNameCStringNotNullTerm             = CheckerNameRef(StringRef("CStringNotNullTerm"));
+        }
     };
 
     CStringChecksFilter Filter;
