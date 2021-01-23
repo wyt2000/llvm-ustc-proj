@@ -25,27 +25,27 @@ void MallocOverflowSecurityChecker::checkPreStmt(
     unsigned Width =  Value.getBitWidth();
     ConstraintManager &CM = C.getConstraintManager();
     // two kinds of programstate
-    ProgramStateRef stateNegative, stateNonNegative;
+    ProgramStateRef stateNonPositive, statePositive;
     // whether the argument is unsigned or not
     bool isUnsigned = Value.isUnsigned();
-    // check whether the argument is negative
-    std::tie(stateNegative, stateNonNegative)
+    // check whether the argument is positive
+    std::tie(stateNonPositive, statePositive)
       = CM.assumeInclusiveRangeDual(C.getState(), 
           *NL,
-          llvm::APSInt(llvm::APInt(Width, 0), isUnsigned),
+          llvm::APSInt(llvm::APInt(Width, 1), isUnsigned),
           llvm::APSInt(llvm::APInt(Width, pow(2,Width-1) - 1),isUnsigned) );
                         
-    // the argument is negative,report this error
-    if (!stateNegative) {
-      assert(stateNonNegative);
+    // the argument is not positive,report this error
+    if (!stateNonPositive) {
+      assert(statePositive);
       // reset bugtype
       if (!BT) {
         BT.reset(new BugType(this,
-          "argument in malloc should not be negative","Example checker "));
+          "argument in malloc should be positive","Example checker "));
       }
       ExplodedNode *N = C.generateErrorNode();
       auto Report = std::make_unique<PathSensitiveBugReport>(*BT,
-                    "argument in malloc should not be negative",N);
+                    "argument in malloc should be positive",N);
       // report explicitly
       C.emitReport(std::move(Report));
     }
