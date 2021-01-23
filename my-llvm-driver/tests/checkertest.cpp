@@ -1,9 +1,5 @@
-void f(int n) {
-    int a =  1 / (n - 1);
-    return ;
-}
-int main()
-{
-    f(0);
-    return 0;
+#include <string.h>
+void test() {
+  const char* s1;
+  int a = strlen(s1);
 }
