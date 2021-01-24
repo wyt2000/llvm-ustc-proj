@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}
     src/Checker/MallocOverflowSecurityChecker.cpp
     src/Checker/CStringChecker.cpp
     src/Checker/NewZeroChecker.cpp
+    src/Checker/DestructorChecker.cpp
     )
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
