@@ -4,18 +4,26 @@ using namespace ento;
 
 bool inDestructor;
 
-void DestructorChecker::checkBeginFunction(CheckerContext &C) const {
+bool DestructorChecker::CheckDestructor(CheckerContext &C) const {
     if (!C.inTopFrame())
-        return;
+        return false;
     const auto *LCtx = C.getLocationContext();
     const auto *MD = dyn_cast<CXXDestructorDecl>(LCtx->getDecl());
     if (!MD)
-        return;
-    inDestructor = true;
+        return false;
+    return true;
+}
+
+void DestructorChecker::checkBeginFunction(CheckerContext &C) const {
+    if (CheckDestructor(C)) {
+        inDestructor = true;
+    }
 }
 
 void DestructorChecker::checkEndFunction(const ReturnStmt *RS, CheckerContext &C) const {
-    inDestructor = false;
+    if (CheckDestructor(C)) {
+        inDestructor = false;
+    }
 }
 
 void DestructorChecker::checkPreStmt(const CallExpr *CE,CheckerContext &C) const {

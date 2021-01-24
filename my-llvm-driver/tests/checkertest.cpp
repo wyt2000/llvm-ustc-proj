@@ -1,14 +1,17 @@
 #include <stdlib.h>
+void f() {
+}
 class A {
 public:
   ~A() {
-    std::exit(1); // warn
+    f();
+    exit(1);
   }
   
   class B {
   public:
     ~B() {
-      std::exit(1); // warn
+      exit(1);
     }
   };
   

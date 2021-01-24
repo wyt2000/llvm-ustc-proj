@@ -21,10 +21,9 @@ namespace ento
 class DestructorChecker : public Checker<   check::BeginFunction,
                                             check::EndFunction,
                                             check::PreStmt<CallExpr> > {
-
+    bool CheckDestructor(CheckerContext &C) const;
     public:
         mutable std::unique_ptr<BugType> BT;
-        // check the argument before call function statement.(on AST)
         void checkBeginFunction(CheckerContext &C) const;
         void checkEndFunction(const ReturnStmt *RS, CheckerContext &C) const;
         void checkPreStmt(const CallExpr *CE,CheckerContext &C) const;
