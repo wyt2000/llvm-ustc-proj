@@ -5,6 +5,12 @@ using namespace ento;
 bool inDestructor;
 
 void DestructorChecker::checkBeginFunction(CheckerContext &C) const {
+    if (!C.inTopFrame())
+        return;
+    const auto *LCtx = C.getLocationContext();
+    const auto *MD = dyn_cast<CXXDestructorDecl>(LCtx->getDecl());
+    if (!MD)
+        return;
     inDestructor = true;
 }
 
