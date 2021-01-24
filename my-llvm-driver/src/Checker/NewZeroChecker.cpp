@@ -21,23 +21,35 @@ void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
     std::cout << Call.getNumImplicitArgs() << std::endl;
     std::cout << "1" << std::endl;
     SVal Argument = C.getSVal(arg1);*/
-    SVal Argument = Call.getObjectUnderConstruction();
+    const CXXNewExpr *Origin = nullptr;
+    Origin = Call.getOriginExpr();
+    const Expr *init = Origin->getInitializer();
+    if (!init)
+      std::cout << "no init" << std::endl;
+    //SVal Argument = Call.getObjectUnderConstruction();
+    SVal Argument = C.getSVal(init);
     std::cout << "2" << std::endl;
-    Optional<NonLoc> NL = Argument.getAs<NonLoc>();
+    if(Argument.isZeroConstant()) {
+      std::cout<<"zero constant"<<std::endl;
+      return;
+    }
+    std::cout<< "subkind" << Argument.getSubKind() <<std::endl;
+    Optional<Loc> NL = Argument.getAs<Loc>();
     std::cout << "3" << std::endl;
     // return as the argument is not a concrete int
-    // if(!NL || NL->getSubKind() != nonloc::ConcreteIntKind){
-    //     return;
-    // }
+    if(!NL || NL->getSubKind() != loc::ConcreteIntKind){
+      if(!NL) std::cout << "no NL" << std::endl;
+        return;
+    }
     std::cout << "4" << std::endl;
     // get the bit width of argument
-    const auto Value = NL->castAs<nonloc::ConcreteInt>().getValue();
+    const auto Value = NL->castAs<loc::ConcreteInt>().getValue();
     std::cout << "5" << std::endl;
     unsigned Width =  Value.getBitWidth();
     ConstraintManager &CM = C.getConstraintManager();
     std::cout << "6" << std::endl;
     // two kinds of programstate
-    ProgramStateRef stateNonPositive, statePositive;
+    /*ProgramStateRef stateNonPositive, statePositive;
     // whether the argument is unsigned or not
     bool isUnsigned = Value.isUnsigned();
     // check whether the argument is positive
@@ -61,7 +73,7 @@ void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
                     "argument in malloc should be positive",N);
       // report explicitly
       C.emitReport(std::move(Report));
-    }
+    }*/
     std::cout << "9" << std::endl;
   //} 
 }
