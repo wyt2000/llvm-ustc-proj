@@ -73,12 +73,48 @@ namespace ento {
     }
 
     enum class ConcatFnKind { none = 0, strcat = 1, strlcat = 2 };
+
+    // shows the info of mem that the pointer points to
+    struct PointerMem {
+    public:
+        enum Kind { Allocated, Unknown };
+    private:
+        // the state of memory: whether it is surely allocated
+        enum Kind K;
+        // the size of allocated memory
+        SVal size;
+        PointerMem(SVal size_in,Kind K_in) : K(K_in),size(size_in){ }
+
+    public:
+        bool isAllocated() const { return K == Allocated; }
+
+        SVal get_size() const{
+            return size;
+        }
+        static PointerMem getNewMem(SVal size_in,Kind K_in) { 
+            return PointerMem(size_in,K_in); }
+
+        bool operator==(const PointerMem &X) const {
+            return K == X.K && size == X.size;
+        }
+        
+        // I think this is useless
+        void Profile(llvm::FoldingSetNodeID &ID) const {
+            ID.AddInteger(1);
+  }
+};
+
     class CStringChecker : public Checker< eval::Call,
                                             check::PreStmt<DeclStmt>,
+                                            check::PostCall,
+                                            check::PreCall,
                                             check::LiveSymbols,
                                             check::DeadSymbols,
                                             check::RegionChanges
                                             > {
+    // call of malloc and free                                            
+    CallDescription Malloc = CallDescription("malloc");
+    CallDescription Free = CallDescription("free");
     mutable std::unique_ptr<BugType> BT_Null, BT_Bounds, BT_Overlap,
         BT_NotCString, BT_AdditionOverflow;
 
@@ -116,6 +152,10 @@ namespace ento {
 
     bool evalCall(const CallEvent &Call, CheckerContext &C) const;
     void checkPreStmt(const DeclStmt *DS, CheckerContext &C) const;
+    // check malloc
+    void checkPostCall(const CallEvent &Call, CheckerContext &C) const;
+    // check free
+    void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
     void checkLiveSymbols(ProgramStateRef state, SymbolReaper &SR) const;
     void checkDeadSymbols(SymbolReaper &SR, CheckerContext &C) const;
 
@@ -249,7 +289,8 @@ namespace ento {
                                 AnyArgExpr Arg, SVal l) const;
     ProgramStateRef CheckLocation(CheckerContext &C, ProgramStateRef state,
                                     AnyArgExpr Buffer, SVal Element,
-                                    AccessKind Access) const;
+                                    AccessKind Access,bool dstSizeTracked,
+                                    SVal &dstStrLength) const;
     ProgramStateRef CheckBufferAccess(CheckerContext &C, ProgramStateRef State,
                                         AnyArgExpr Buffer, SizeArgExpr Size,
                                         AccessKind Access) const;
