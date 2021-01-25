@@ -41,7 +41,7 @@ void MallocOverflowSecurityChecker::checkPreStmt(
       // reset bugtype
       if (!BT) {
         BT.reset(new BugType(this,
-          "argument in malloc should be positive","Example checker "));
+          "argument in malloc should be positive","MallocOverflowChecker"));
       }
       ExplodedNode *N = C.generateErrorNode();
       auto Report = std::make_unique<PathSensitiveBugReport>(*BT,
