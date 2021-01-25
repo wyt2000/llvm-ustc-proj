@@ -20,24 +20,12 @@ namespace clang
 namespace ento
 {
 
-struct NewZeroCheck {
-  const BinaryOperator *mulop;
-  const Expr *variable;
-  APSInt maxVal;
-
-  NewZeroCheck(const BinaryOperator *m, const Expr *v, APSInt val)
-      : mulop(m), variable(v), maxVal(std::move(val)) {}
-
-};
-
 class NewZeroChecker : public Checker<check::NewAllocator> {
-
-    public:
+public:
     mutable std::unique_ptr<BugType> BT;
-    // check the argument before call function statement.(on AST)
+    // check the argument of new
     void checkNewAllocator(const CXXAllocatorCall &Call,
                                   CheckerContext &C) const;
-
 };
 
 // end of namespace

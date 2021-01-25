@@ -7,7 +7,7 @@ using namespace ento;
 using llvm::APSInt;
 SimpleProgramPointTag tag("H2020.NewZeroChecker", "new argument should be positive");
 
-// check whether the argument of malloc is negative.
+// check whether the argument of new is not positive.
 // if so, report the error
 void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
                                   CheckerContext &C) const {
@@ -27,11 +27,15 @@ void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
     else {
       llvm_unreachable("not a CallExpr or CXXNewExpr");
     }
+
+    // get symbolic value of argument
     SVal Argument = C.getSVal(arg1);
     Optional<NonLoc> NL = Argument.getAs<NonLoc>();
     const auto Value = NL->castAs<nonloc::ConcreteInt>().getValue();
     unsigned Width =  Value.getBitWidth();
     ConstraintManager &CM = C.getConstraintManager();
+
+    // set program state
     ProgramStateRef stateNonPositive, statePositive;
     bool isUnsigned = Value.isUnsigned();
     std::tie(stateNonPositive, statePositive)
@@ -39,6 +43,7 @@ void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
           *NL,
           llvm::APSInt(llvm::APInt(Width, 1), isUnsigned),
           llvm::APSInt(llvm::APInt(Width, pow(2,Width-1) - 1),isUnsigned) );
+          
     // the argument is not positive,report this error
     if (!stateNonPositive) {
       assert(statePositive);
@@ -51,7 +56,6 @@ void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
       auto Report = std::make_unique<PathSensitiveBugReport>(*BT,
                     "new argument should be positive", N);
       // report explicitly
-      N = C.generateErrorNode(C.getState(), &tag);
       C.emitReport(std::move(Report));
     }
 }
