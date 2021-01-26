@@ -1,5 +1,5 @@
-#ifndef __DESTRUCTOR_CHECKER_H__
-#define __DESTRUCTOR_CHECKER_H__
+#ifndef __DESTRUCTOR_STATIC_CHECKER_H__
+#define __DESTRUCTOR_STATIC_CHECKER_H__
 
 #include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/AST/EvaluatedExprVisitor.h"
@@ -18,15 +18,15 @@ namespace clang
 namespace ento
 {
 
-class DestructorChecker : public Checker<   check::BeginFunction,
+class DestructorStaChecker : public Checker<   check::BeginFunction,
                                             check::EndFunction,
-                                            check::PreStmt<CallExpr> > {
+                                            check::PreStmt<DeclStmt> > {
     bool CheckDestructor(CheckerContext &C) const;
     public:
         mutable std::unique_ptr<BugType> BT;
         void checkBeginFunction(CheckerContext &C) const;
         void checkEndFunction(const ReturnStmt *RS, CheckerContext &C) const;
-        void checkPreStmt(const CallExpr *CE,CheckerContext &C) const;
+        void checkPreStmt(const DeclStmt *DS, CheckerContext &C) const;
 };
 
 // end of namespace

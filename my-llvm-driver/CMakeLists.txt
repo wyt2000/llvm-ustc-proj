@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
     src/Checker/CStringChecker.cpp
     src/Checker/NewZeroChecker.cpp
     src/Checker/DestructorChecker.cpp
+    src/Checker/DestructorStaChecker.cpp
     )
 target_link_libraries(${PROJECT_NAME}
     PRIVATE

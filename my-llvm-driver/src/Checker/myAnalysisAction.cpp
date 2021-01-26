@@ -10,6 +10,7 @@
 #include "Checker/CStringChecker.h"
 #include "Checker/NewZeroChecker.h"
 #include "Checker/DestructorChecker.h"
+#include "Checker/DestructorStaChecker.h"
 // TODO: include你编写的Checker的头文件
 
 
@@ -30,6 +31,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
   addChecker<CStringChecker>(CI, AnalysisConsumer.get(), "H2020.CStringChecker");
   addChecker<NewZeroChecker>(CI, AnalysisConsumer.get(), "H2020.NewZeroChecker");
   addChecker<DestructorChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorChecker");
+  addChecker<DestructorStaChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorStaChecker");
   // TODO: 在这里按照上面的示例调用addChecker函数添加自己编写的Checker
 
 
