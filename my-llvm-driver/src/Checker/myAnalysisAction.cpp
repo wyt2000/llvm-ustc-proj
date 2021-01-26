@@ -11,6 +11,7 @@
 #include "Checker/NewZeroChecker.h"
 #include "Checker/DestructorChecker.h"
 #include "Checker/DestructorStaChecker.h"
+#include "Checker/LeakEvalOrderChecker.h"
 // TODO: include你编写的Checker的头文件
 
 
@@ -32,6 +33,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
   addChecker<NewZeroChecker>(CI, AnalysisConsumer.get(), "H2020.NewZeroChecker");
   addChecker<DestructorChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorChecker");
   addChecker<DestructorStaChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorStaChecker");
+  addChecker<LeakEvalOrderChecker>(CI, AnalysisConsumer.get(), "H2020.LeakEvalOrderChecker");
   // TODO: 在这里按照上面的示例调用addChecker函数添加自己编写的Checker
 
 
