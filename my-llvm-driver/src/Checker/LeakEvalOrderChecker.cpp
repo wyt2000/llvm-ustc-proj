@@ -22,7 +22,15 @@ bool LeakEvalOrderChecker::getNoReturn(const CallExpr *CE,CheckerContext &C) con
         if (TE) {
             return true;
         }
+        const CallExpr* CC = dyn_cast<CallExpr>(Child);
+        if (CC) {
+            D = CC->getDirectCallee();
+            if (D && D->isNoReturn()) {
+                return true;
+            }
+        }
     }
+    return false;
 }
 
 bool LeakEvalOrderChecker::getMallocOrNew(const CallExpr *CE,CheckerContext &C) const {

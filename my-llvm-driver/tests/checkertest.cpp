@@ -1,11 +1,14 @@
 #include <stdlib.h>
 void f(int, int);
-int g(void *);
-int h() __attribute__((noreturn));
+int g(int *);
+int h(int x) {
+  throw 1;
+  return -1;
+};
 
 void test() {
-  // It is possible that 'malloc(1)' is called first,
-  // then 'h()', that is (or calls) noreturn and eventually
+  // It is possible that 'new int' is called first,
+  // then 'h()', that throws an exception and eventually
   // 'g()' is never called.
-  f(g(malloc(1)), h()); // warn: 'g()' may never be called.
+  f(g(new int), h(1)); // warn: 'g()' may never be called.
 }
