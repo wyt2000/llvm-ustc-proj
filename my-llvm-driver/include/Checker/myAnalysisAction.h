@@ -11,6 +11,7 @@
 
 
 #include <vector>
+#include <map>
 
 using namespace llvm;
 using namespace clang;
@@ -20,6 +21,7 @@ using namespace clang::ento;
 class myAnalysisAction : public ASTFrontendAction {
   
 private:
+  std::vector<std::string> CheckerArgs;
   template <class checker>
   void addChecker(CompilerInstance &CI, AnalysisASTConsumer * AnalysisConsumer, llvm::StringRef FullName) {
     // 注册自定义的checker
@@ -33,11 +35,10 @@ private:
   }
 
 public:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(
-    CompilerInstance &CI, llvm::StringRef InFile) override;
-
-
-  
+  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, llvm::StringRef InFile) override;
+  void setCheckerArgs(const std::vector<std::string> &CA) {
+    CheckerArgs = CA;
+  }
 };
 
 

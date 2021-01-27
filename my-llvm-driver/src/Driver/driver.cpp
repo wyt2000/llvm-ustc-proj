@@ -75,6 +75,10 @@ bool Driver::ParseArgs(SVec &Args) {
             _OutFile.append(pos);
             _Args.erase(s);
         }
+        if(0 == strncmp(*s, "-analyzer-checker=", 18)) {
+            CheckerArgs.push_back(std::string(strstr(*s, "=") + 1));
+            _Args.erase(s);
+        }
     }
     // llvm::outs() << "input args size is " << _Args.size() << "\n";
     return true;
@@ -148,6 +152,7 @@ void Driver::InitializePasses(){
 
 bool Driver::runChecker() {
     std::unique_ptr<myAnalysisAction> AAct(new myAnalysisAction());
+    AAct->setCheckerArgs(CheckerArgs);
     bool Res = _Clang.ExecuteAction(*AAct);
     if(Res == true) {
         std::cout << "Execute AnalysisAction Success" << std::endl;

@@ -35,6 +35,7 @@ private:
     PassRegistry* _PassRegistry;
     std::unique_ptr<legacy::PassManager> _PM;
     std::unique_ptr<legacy::FunctionPassManager> _FPM;
+    std::vector<std::string> CheckerArgs;
 
 public:
     Driver(StringRef ClangExecutable, StringRef TargetTriple,
