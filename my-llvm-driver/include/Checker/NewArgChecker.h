@@ -20,7 +20,7 @@ namespace clang
 namespace ento
 {
 
-class NewZeroChecker : public Checker<check::NewAllocator> {
+class NewArgChecker : public Checker<check::NewAllocator> {
 public:
     mutable std::unique_ptr<BugType> BT;
     // check the argument of new

@@ -1,15 +1,15 @@
-#include "Checker/NewZeroChecker.h"
+#include "Checker/NewArgChecker.h"
 #include <iostream>
 #include <string>
 #include <math.h>
 using namespace clang;
 using namespace ento;
 using llvm::APSInt;
-SimpleProgramPointTag tag("H2020.NewZeroChecker", "new argument should be positive");
+SimpleProgramPointTag tag("H2020.NewArgChecker", "new argument should be positive");
 
 // check whether the argument of new is not positive.
 // if so, report the error
-void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
+void NewArgChecker::checkNewAllocator(const CXXAllocatorCall &Call,
                                       CheckerContext &C) const {
     unsigned implicitargs = Call.getNumImplicitArgs();
     const Expr * arg1=nullptr;
@@ -50,7 +50,7 @@ void NewZeroChecker::checkNewAllocator(const CXXAllocatorCall &Call,
         // reset bugtype
         if (!BT) {
             BT.reset(new BugType(this,
-            "new argument should be positive","newZeroChecker"));
+            "new argument should be positive","NewArgChecker"));
         }
         ExplodedNode *N = C.generateErrorNode(C.getState(), &tag);
         auto Report = std::make_unique<PathSensitiveBugReport>(*BT,
