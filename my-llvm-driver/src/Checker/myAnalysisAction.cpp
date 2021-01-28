@@ -8,7 +8,7 @@
 #include "Checker/SimpleStreamChecker.h"
 #include "Checker/MallocOverflowSecurityChecker.h"
 #include "Checker/CStringChecker.h"
-#include "Checker/NewZeroChecker.h"
+#include "Checker/NewArgChecker.h"
 #include "Checker/DestructorChecker.h"
 #include "Checker/DestructorStaChecker.h"
 #include "Checker/LeakEvalOrderChecker.h"
@@ -34,7 +34,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
     {"H2020.SimpleStreamChecker",               1},
     {"H2020.MallocOverflowSecurityChecker",     2},
     {"H2020.CStringChecker",                    3},
-    {"H2020.NewZeroChecker",                    4},
+    {"H2020.NewArgChecker",                    4},
     {"H2020.DestructorChecker",                 5},
     {"H2020.DestructorStaChecker",              6},
     {"H2020.LeakEvalOrderChecker",              7},
@@ -61,7 +61,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
         break;
       case 4:
         addChecker<DumbChecker>(CI, AnalysisConsumer.get(), "DumbChecker");
-        addChecker<NewZeroChecker>(CI, AnalysisConsumer.get(), "H2020.NewZeroChecker");
+        addChecker<NewArgChecker>(CI, AnalysisConsumer.get(), "H2020.NewArgChecker");
         break;
       case 5:
         addChecker<DestructorChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorChecker");
@@ -80,7 +80,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
         addChecker<SimpleStreamChecker>(CI, AnalysisConsumer.get(), "H2020.SimpleStreamChecker");
         addChecker<MallocOverflowSecurityChecker>(CI, AnalysisConsumer.get(), "H2020.MallocOverflowSecurityChecker");
         addChecker<CStringChecker>(CI, AnalysisConsumer.get(), "H2020.CStringChecker");
-        addChecker<NewZeroChecker>(CI, AnalysisConsumer.get(), "H2020.NewZeroChecker");
+        addChecker<NewArgChecker>(CI, AnalysisConsumer.get(), "H2020.NewArgChecker");
         addChecker<DestructorChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorChecker");
         addChecker<DestructorStaChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorStaChecker");
         addChecker<LeakEvalOrderChecker>(CI, AnalysisConsumer.get(), "H2020.LeakEvalOrderChecker");
