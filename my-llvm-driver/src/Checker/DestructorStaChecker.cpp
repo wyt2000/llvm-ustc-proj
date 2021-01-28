@@ -19,9 +19,6 @@ void DestructorStaChecker::checkBeginFunction(CheckerContext &C) const {
     if (CheckDestructor(C)) {
         inDestructor2 = true;
     }
-    else {
-        inDestructor2 = false;
-    }
 }
 
 void DestructorStaChecker::checkEndFunction(const ReturnStmt *RS, CheckerContext &C) const {
