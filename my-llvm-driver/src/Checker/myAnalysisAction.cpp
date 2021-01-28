@@ -14,6 +14,7 @@
 #include "Checker/LeakEvalOrderChecker.h"
 #include "Checker/DestructorThrowChecker.h"
 #include "Checker/DumbChecker.h"
+#include "Checker/StaticInitReenteredChecker.h"
 // TODO: include你编写的Checker的头文件
 
 
@@ -84,6 +85,8 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
         addChecker<DestructorStaChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorStaChecker");
         addChecker<LeakEvalOrderChecker>(CI, AnalysisConsumer.get(), "H2020.LeakEvalOrderChecker");
         addChecker<DestructorThrowChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorThrowChecker");
+        addChecker<StaticInitReenteredChecker>(CI, AnalysisConsumer.get(), "H2020.StaticInitReenteredChecker");
+        
         break;
     }
   }
