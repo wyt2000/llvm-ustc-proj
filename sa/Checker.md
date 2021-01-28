@@ -167,7 +167,7 @@ void DestructorThrowChecker::checkPreStmt(const CallExpr *CE, CheckerContext &C)
 
 在一个函数调用参数的时候，假如位置在先的参数是一个函数并且开辟了新的内存空间，而位置在后的参数没有返回的情况下，就可能会造成位置在先的函数没有被调用，内存泄漏。
 
-![avatar](pictures\leak.png)
+![avatar](pictures/leak.png)
 
 #### 2.实现思路
 
@@ -245,4 +245,4 @@ bool LeakEvalOrderChecker::getMallocOrNew(const CallExpr *CE,CheckerContext &C) 
 
 #### 3.效果展示
 
-![avatar](pictures\leak_test.png)
+![avatar](pictures/leak_test.png)
