@@ -19,8 +19,8 @@ namespace ento
 {
 
 class DestructorStaChecker : public Checker<   check::BeginFunction,
-                                            check::EndFunction,
-                                            check::PreStmt<DeclStmt> > {
+                                               check::EndFunction,
+                                               check::PreStmt<DeclStmt> > {
     bool CheckDestructor(CheckerContext &C) const;
     public:
         mutable std::unique_ptr<BugType> BT;
