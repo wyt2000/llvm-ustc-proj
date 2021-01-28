@@ -38,6 +38,8 @@
 
    - 它们中的变量从左值到右值都有一个显式变换。
 
+   - `ExplodedGraph.svg`中两个程序点相同、程序状态不同的块不能合并，而在`CFG`会被分为同一个块。
+
 6. 特别说明：如果你采用了release配置，或者你无法正常产生svg，你可以选择使用dump选项，并将文字输出放在对应名字的txt中。其他格式的图片也可以接受， 你不需要为格式问题耗费时间。
 
 ### 2.2 阅读[Checker Developer Manual](http://clang-analyzer.llvm.org/checker_dev_manual.html)的Static Analyzer Overview一节
@@ -50,21 +52,26 @@
 
 2. Checker 在分析程序时需要记录程序状态，这些状态一般保存在哪里？
 
-   在 `ExplodedGraph` 中的 `ExploedeNode` 里，它包括 `ProgramPoint` 和 `ProgramState`。
+   在 `ExplodedGraph` 中的 `ExploedeNode` 里，它包括 `ProgramPoint` 和 `ProgramState`，即程序状态。
 
 3. 简要解释分析器在分析下面程序片段时的过程，在过程中产生了哪些symbolic values? 它们的关系是什么？
 
-   x的值$0，y的值$1，p和&x的值$2，p+1的值$3，z和*(p+1)的值$4
+   x的值`$0`，y的值`$1`，p和&x的值`$2`，p+1的值`$3`，z和*(p+1)的值`$4`
 
-   $2是$0的地址，$3是$2的自增加1，$4是$3地址位置的值。
-
-一段程序：
-
-```
-int x = 3, y = 4;
-int *p = &x;
-int z = *(p + 1);
-```
+   `$2`是`$0`的地址，`$3`是`$2`的自增加1，`$4`是`$3`地址位置的值。
+   
+   一段程序：
+   
+   ```
+   int x = 3, y = 4;
+   // 得到引用3的SVal，计算x左值(MemRegion)，并且把这个SVal和表示3的SVal绑定； y=4 同理。
+   int *p = &x;
+   // 先得到表示x左值的SVal，再构造新的SVal表示&x，即x的左值，赋值给p的时候，先计算p的左值(MemRegion)，再把SVal和&x的SVal绑定
+   int z = *(p + 1);
+   // 得到p左值的SVal，转换成p右值的SVal，构造表示1的SVal，构造新的SVal表示p+1，再构造新的*(p+1)的SVal，最后计算z的左值，把z的SVal和*(p+1)的SVal绑定。
+   ```
+   
+   
 
 ### 2.3 简要阅读[LLVM Programmer's Manual](http://llvm.org/releases/11.0.0/docs/ProgrammersManual.html)和[LLVM Coding Standards](http://llvm.org/releases/11.0.0/docs/CodingStandards.html)
 
