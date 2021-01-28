@@ -39,7 +39,8 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
     {"H2020.DestructorStaChecker",              6},
     {"H2020.LeakEvalOrderChecker",              7},
     {"H2020.DestructorThrowChecker",            8},
-    {"All",                                     9}
+    {"H2020.StaticInitReenteredChecker",        9},
+    {"All",                                     10}
   };
 
   for (auto s : CheckerArgs) {
@@ -76,6 +77,8 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
         addChecker<DestructorThrowChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorThrowChecker");
         break;
       case 9:
+        addChecker<StaticInitReenteredChecker>(CI, AnalysisConsumer.get(), "H2020.StaticInitReenteredChecker");
+      case 10:
         addChecker<SimpleDivChecker>(CI, AnalysisConsumer.get(), "H2020.SimpleDivChecker");
         addChecker<SimpleStreamChecker>(CI, AnalysisConsumer.get(), "H2020.SimpleStreamChecker");
         addChecker<MallocOverflowSecurityChecker>(CI, AnalysisConsumer.get(), "H2020.MallocOverflowSecurityChecker");
@@ -86,7 +89,6 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
         addChecker<LeakEvalOrderChecker>(CI, AnalysisConsumer.get(), "H2020.LeakEvalOrderChecker");
         addChecker<DestructorThrowChecker>(CI, AnalysisConsumer.get(), "H2020.DestructorThrowChecker");
         addChecker<StaticInitReenteredChecker>(CI, AnalysisConsumer.get(), "H2020.StaticInitReenteredChecker");
-        
         break;
     }
   }

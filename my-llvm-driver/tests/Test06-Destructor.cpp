@@ -6,9 +6,6 @@ void test() {
 
 class A {
 public:
-    A() {
-        std::exit(0); // no warn
-    }
     ~A() {
         test();// warn
     }
