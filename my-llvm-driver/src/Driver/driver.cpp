@@ -45,6 +45,7 @@ void PrintHelp() {
     // llvm::outs() << "-dce                           调用死代码删除,Ref:llvm/Transforms/Scalar/DCE.h,默认不调用\n";
     llvm::outs() << "-o=<输出IR文件路径>            指定LLVM IRs输出文件路径,若无则输出到标准输出\n"; 
     llvm::outs() << "-h --help --h                  显示帮助菜单\n";
+    llvm::outs() << "-analyzer-checker=CheckerName  选择指定 Checker 进行静态分析\n";
 }
 
 Driver::Driver(StringRef ClangExecutable, StringRef TargetTriple,

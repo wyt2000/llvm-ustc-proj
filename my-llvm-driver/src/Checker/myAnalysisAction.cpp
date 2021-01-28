@@ -13,6 +13,7 @@
 #include "Checker/DestructorStaChecker.h"
 #include "Checker/LeakEvalOrderChecker.h"
 #include "Checker/DestructorThrowChecker.h"
+#include "Checker/DumbChecker.h"
 // TODO: include你编写的Checker的头文件
 
 
@@ -58,6 +59,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
         addChecker<CStringChecker>(CI, AnalysisConsumer.get(), "H2020.CStringChecker");
         break;
       case 4:
+        addChecker<DumbChecker>(CI, AnalysisConsumer.get(), "DumbChecker");
         addChecker<NewZeroChecker>(CI, AnalysisConsumer.get(), "H2020.NewZeroChecker");
         break;
       case 5:

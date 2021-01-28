@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
     src/Checker/DestructorStaChecker.cpp
     src/Checker/LeakEvalOrderChecker.cpp
     src/Checker/DestructorThrowChecker.cpp
+    src/Checker/DumbChecker.cpp
     )
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
