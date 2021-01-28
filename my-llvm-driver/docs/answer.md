@@ -45,3 +45,10 @@
 假设 $ WIDomCandidate $ 不是 $ Sdom(v) $ 和 $ parent_T(v) $ 在支配树 $ D $ 上的最近共同祖先,那么存在 $ WIDomCandidate^\prime $ 为 $ Sdom(v) $ 和 $ parent_T(v) $ 在支配树 $ D $ 上的共同祖先且 $ WIDomCandidate^\prime $ 比 $ WIDomCandidate $ 在 $ D $ 上更接近 $ parent_T(v) $.此时 $ parent_T(v) $ 经过更少次数的迭代可以找到 $ WIDomCandidate^\prime $,说明 $ DFSNum(WIDomCandidate^\prime) > DFSNum(WIDomCandidate) $.又因为在 $ D $ 上, $ WIDomCandidate $ 是 $ parent_T(v) $ 的最近的一个 $ DFSNum $ 不大于 $ DFSNum(Sdom(v)) $ 的祖先,因此 $ DFSNum(WIDomCandidate^\prime) > Sdom(v) $.由引理3可知,在 $ G $ 中 $ WIDomCandidate^\prime $ 不能支配 $ Sdom(v) $,因此 $ WIDomCandidate^\prime $ 不是 $ Sdom(v) $ 在支配树 $ D $ 上的祖先,与假设矛盾.
 
 综合以上证明可知,按照以上算法得到的 $ WIDomCandidate $ 是 $ Sdom(v) $ 和 $ parent_T(v) $ 在支配树 $ D $ 上的最近共同祖先.  $ \square $ 
+
+# 循环统计分析
+一个典型的循环由 cond, body, inc 三个基本块组成：在 cond 处判断是否满足循环条件，满足则进入 body，否则跳转到 inc 后面的基本块。对于 inc 基本块，它的后继基本块为 entry。
+如果当前结点的后继结点支配当前结点，说明当前结点对应的基本块是 inc 基本块，即对应循环的出口。
+如果当前结点的支配它的前驱结点，说明当前结点对应的基本块是 cond 基本块，即对应循环的入口。
+所以只需要在循环的入口记录循环深度增加，在循环的出口输出循环信息即可。
+但是这种方法无法处理死循环没有回边的问题，比如一个 for 循环内部是一个 while(1) ，则 for 循环的 inc 块没有前驱，它不支配 cond 块，for 循环没有回边。
