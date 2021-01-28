@@ -34,7 +34,7 @@ std::unique_ptr<ASTConsumer> myAnalysisAction::CreateASTConsumer(
     {"H2020.SimpleStreamChecker",               1},
     {"H2020.MallocOverflowSecurityChecker",     2},
     {"H2020.CStringChecker",                    3},
-    {"H2020.NewArgChecker",                    4},
+    {"H2020.NewArgChecker",                     4},
     {"H2020.DestructorChecker",                 5},
     {"H2020.DestructorStaChecker",              6},
     {"H2020.LeakEvalOrderChecker",              7},
