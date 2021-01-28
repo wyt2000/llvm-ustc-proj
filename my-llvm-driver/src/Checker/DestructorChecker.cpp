@@ -37,5 +37,6 @@ void DestructorChecker::checkPreStmt(const CallExpr *CE,CheckerContext &C) const
                         "exit() shouldn't be called by destructor",N);
         // report explicitly
         C.emitReport(std::move(Report));
+        inDestructor = false;
     }
 }

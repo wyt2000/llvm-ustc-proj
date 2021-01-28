@@ -1,6 +1,6 @@
 
 // #include "clang/Frontend/FrontendDiagnostic.h"
-#define _CHECKER_DEBUG
+// #define _CHECKER_DEBUG
 #include "clang/Frontend/TextDiagnosticPrinter.h"
 #include "clang/Basic/TargetInfo.h"
 

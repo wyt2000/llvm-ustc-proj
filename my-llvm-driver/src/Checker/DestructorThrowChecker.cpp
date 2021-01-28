@@ -52,5 +52,6 @@ void DestructorThrowChecker::checkPreStmt(const CallExpr *CE, CheckerContext &C)
             // report explicitly
             C.emitReport(std::move(Report));
         }
+        inDestructor3 = false;
     }
 }

@@ -45,5 +45,6 @@ void DestructorStaChecker::checkPreStmt(const DeclStmt *DS, CheckerContext &C) c
                 C.emitReport(std::move(Report));
             }
         }
+        inDestructor2 = false;
     }
 }
