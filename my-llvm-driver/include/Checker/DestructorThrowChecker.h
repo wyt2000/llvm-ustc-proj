@@ -20,13 +20,13 @@ namespace ento
 
 class DestructorThrowChecker : public Checker<   check::BeginFunction,
                                                  check::EndFunction,
-                                                 check::PreStmt<CXXThrowExpr> > {
+                                                 check::PreStmt<CallExpr> > {
     bool CheckDestructor(CheckerContext &C) const;
     public:
         mutable std::unique_ptr<BugType> BT;
         void checkBeginFunction(CheckerContext &C) const;
         void checkEndFunction(const ReturnStmt *RS, CheckerContext &C) const;
-        void checkPreStmt(const CXXThrowExpr *TE, CheckerContext &C) const;
+        void checkPreStmt(const CallExpr *CE, CheckerContext &C) const;
 };
 
 // end of namespace
