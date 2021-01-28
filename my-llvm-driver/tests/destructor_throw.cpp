@@ -5,7 +5,6 @@ void f() {
 class A {
   A() {}
   ~A() { 
-    throw 1;
     f(); 
   } // warn
 };
