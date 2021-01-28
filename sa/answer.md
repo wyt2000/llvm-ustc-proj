@@ -16,10 +16,10 @@
 
    - test.c 是程序的源文件，里面包含了一个 for 循环和一个 goto 跳转语句。
 
-     ```
+     ```c
      int main() {
          L1:
-         for(int i=0;i<10;i++){
+         for(int i=0;i<2;i++){
              i++;
          }
          int j = 0;
