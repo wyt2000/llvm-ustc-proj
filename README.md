@@ -1,6 +1,10 @@
 # 编译原理小组
 
 ## 组员：范文，孙一鸣，吴钰同，刘逸菲
+## 技术报告：
+- 必做：
+- 选做基础：https://gitee.com/compiler_project/llvm-ustc-proj/blob/master/sa/answer.md
+- 选做扩展：https://gitee.com/compiler_project/llvm-ustc-proj
 
 #### 注：以下内容为实验文档。
 # LLVM-USTC实践项目
