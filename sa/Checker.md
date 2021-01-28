@@ -100,6 +100,14 @@
 #### 1.检查目标
 我们希望检查析构函数中是否有 `exit` 函数和 `throw` 语句。如果有这些语句，那么析构函数没办法正常结束，因此会导致变量的内存不能被正常释放从而造成了内存泄露。所以，我们写了 `DestructorChecker` 和`DestructorThrowChecker` 分别检查以上两种情况。
 
+![avatar](pictures/des_exit.png)
+
+![avatar](pictures/des_expt.png)
+
+同时，如果析构函数中含有静态局部变量，会导致控制流通过先前销毁的静态局部对象的定义。在`DestructorStaChecker`中检查。
+
+![avatar](pictures/des_static.png)
+
 #### 2.设计思路
 首先，我们需要知道当前程序状态点是否在析构函数中。在这里，我们使用全局的布尔变量 `inDestructor` 来标记。在CFG上进入一个函数的时候，检查器通过调用 `checkBeginFunction`，利用 `CheckerContext` 对象提供的上下文信息，来判断这个函数是否为析构函数。当这个函数为析构函数的时候，将 `inDestructor` 置位为 `true`。当在CFG上离开一个函数的时候，检查器调用 `checkEndFunction`，将 `inDestructor` 复位为 `false`。
 
@@ -149,11 +157,31 @@ void DestructorThrowChecker::checkPreStmt(const CallExpr *CE, CheckerContext &C)
 }
 ```
 
+并且对每一个定义语句`DeclStmt`检查是否在析构函数中，假如在析构函数中并且当前定义的变量是静态局部的类型，那么需要报告warning：
+
+```c++
+    if(inDestructor2) {
+        for(const auto *I : DS->decls()) {
+            const VarDecl *VD = dyn_cast<VarDecl>(I);
+            if(!VD)
+                continue;
+            if(VD->isStaticLocal()) {
+                // report warning
+            }
+        }
+    }
+```
+
 #### 3.效果展示
+
 使用`DestructorThrowChecker` 分析以下的程序会警告throw不能在析构函数中被使用，说明这里可以正常分析。
 ![avatar](pictures/destructor_throw.png)
 使用 `DestructorChecker`分析以下的程序，会对析构函数中的exit进行警告，对构造函数以及main函数则不会警告。
 ![avatar](pictures/destructor_exit.png)
+
+使用`DestructorStaChecker`对析构函数中的`static local object`警告。
+
+![avatar](pictures/des_sta_test.png)
 
 
 
