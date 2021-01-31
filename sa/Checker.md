@@ -1,7 +1,7 @@
 
 # G1 Clang Static Checker 技术文档
 
-本文档由中科大2020编译原理H的G1小组开发，主要展示了我们小组实现的`Clang Static Checker`、如何利用测试脚本进行测试、以及对答辩时互动提问的记录。
+本文档由中科大2020编译原理H的G1小组开发，主要展示了我们小组实现的`Clang Static Checker(CSA)`、如何利用测试脚本进行测试、以及对答辩时互动提问的记录。
 
 [TOC]
 ## Checker介绍
@@ -623,6 +623,106 @@ cd ..
 
 以下是在答辩过程中，针对老师同学们提出的问题的记录和回答。
 
+### 问题1
+**问题:** 请问你们实现 strcpy 的检查器是只针对动态分配的指针进行检查吗？
+
+**回答：** 
+是的，因为 `CSA` 中原本的 `CStringChecker` 已经可以检查 `strcpy` 中静态指针是否会导致非法越界访问了。
+比如说，针对如下测试代码,指针 `s` 指向了静态分配的数组 `s1`，
+
+```cpp
+#include <string.h>
+int main()
+{
+    char s1[2] = "a";
+    char *s = s1;
+    char s2[4] = "bcd";
+    strcpy(s,s2);
+    return 0;
+}
+```
+
+我们在 `my-llvm-driver` 上注册原有的`CStringChecker`进行测试，可以得到以下提醒：
+
+```
+PB18111679@ustc-09:~/llvm-ustc-proj/my-llvm-driver/tests$ ../build/mClang testcode.cpp
+Use clang: /home/ustc/LLVM/llvm-install/bin/clang
+Driver "USTC Compiler Course H2020 Driver" Created Successfully! 
+Dump IR successfully.
+testcode.cpp:7:5: warning: String copy function overflows the destination buffer [H2020.CStringChecker]
+    strcpy(s,s2);
+    ^~~~~~~~~~~~
+1 warning generated.
+Execute AnalysisAction Success
+```
+
+然而面对动态分配的指针，原有的 `CStringChecker` 没法进行检测。比如面对如下程序，指针 `s` 指向了动态分配的2个字节的内存空间。
+```cpp
+#include <string.h>
+#include <stdlib.h>
+int main()
+{
+    char *s = (char*)malloc(2*sizeof(char));
+    char s2[4] = "bcd";
+    strcpy(s,s2);
+    return 0;
+}
+```
+得到了检测的结果中并没有报错。
+```
+PB18111679@ustc-09:~/llvm-ustc-proj/my-llvm-driver/tests$ ../build/mClang testcode.cpp
+Use clang: /home/ustc/LLVM/llvm-install/bin/clang
+Driver "USTC Compiler Course H2020 Driver" Created Successfully! 
+Dump IR successfully.
+Execute AnalysisAction Success
+```
+
+这里不给出警告的原因可能是 `malloc` 动态分配的内存可能是以块为力度分配的，实际不一定正好就分配2字节。所以，在运行这个程序的时候，也可能不会出现`segmentation fault`。但是，我们还是希望把这个提醒告诉程序员，因此在原有 `CStringChecker` 基础上增加了对 `malloc` 动态分配的指针的检测。
+
+### 问题2
+**问题:** 请问 strcpy 的检查器中能否检查经过指针运算后的指针？
+**回答：** 
+由于时间有限，我们组没有实现对指针运算之后的检查。实际上，这相对难以实现。因为我们在静态分析的时候，得到的是指针变量的一个符号值，并非其指向的真实内存地址，因此很难判断一个经过指针运算后的指针指向的内存空间的大小。
+
+### 问题3
+**问题:** 请问为什么要在strcpy中加map这个数据结构？
+**回答：** 
+类似于 `SimpleStreamChecker`，添加的 `map` 建立了从指针符号值到指针指向的内存大小之间的映射。这个映射在 `malloc` 的时候建立，在 `strcpy` 的时候可以被使用到。
+
+### 问题4
+**问题:** 请问为什么静态变量不能递归初始化？
+**回答:**
+假设在函数`f()`中存在对静态局部变量 `s` 的初始化。当在 `s` 尚未完成初始化时，就继续递归调用 `f`，里面又有对 `s` 的初始化，那么就有可能在实际运行中产生错误。比如我们找的这个例子：
+```cpp
+int test(int i){
+    static int s = test(2*i);
+    return i+1;
+}
+
+int main(){
+    test(1);
+}
+```
+在`clang++`编译之后运行，会产生如下错误：
+```
+terminate called after throwing an instance of '__gnu_cxx::recursive_init_error'
+  what():  std::exception
+Aborted (core dumped)
+```
+
+根据[官方文档](https://gcc.gnu.org/onlinedocs/gcc-4.7.2/libstdc++/api/a00064.html)，这里的 `recursive_init_error` 是指在对象初始化时递归地进入声明，它是一个未定义行为。
+```
+Detailed Description
+Exception thrown by __cxa_guard_acquire.
+
+6.7[stmt.dcl]/4: If control re-enters the declaration (recursively) while the object is being initialized, the behavior is undefined.
+```
+
+### 问题5
+**问题:** 既然 `malloc` 的参数在很多时候的不确定的，那静态分析意义何在？
+**回答:** 
+静态分析可以在参数确定的情况下，检查出程序中一些隐式的警告（比如内存泄露），而这些警告可能在编译和运行的时候不会报出来。
+在参数不确定的情况下，静态分析无法检测这种问题。而张老师提到了`LLVM` 中的 `AddressSanitizer` 技术，可以在运行时对程序进行动态的分析，从而及时检查出内存的错误。比如，`AddressSanitizer`可以替换 `malloc` 和 `free` 的实现，使得它们在调用之前会对内存的状态进行判断。详细内容请见[官方文档](https://clang.llvm.org/docs/AddressSanitizer.html)
 
 
 
