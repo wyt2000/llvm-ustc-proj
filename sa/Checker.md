@@ -677,7 +677,7 @@ Dump IR successfully.
 Execute AnalysisAction Success
 ```
 
-这里不给出警告的原因可能是 `malloc` 动态分配的内存可能是以块为力度分配的，实际不一定正好就分配2字节。所以，在运行这个程序的时候，也可能不会出现`segmentation fault`。但是，我们还是希望把这个提醒告诉程序员，因此在原有 `CStringChecker` 基础上增加了对 `malloc` 动态分配的指针的检测。
+这里不给出警告的原因可能是 `malloc` 动态分配的内存可能是以块为粒度分配的，实际不一定正好就分配2字节。所以，在运行这个程序的时候，也可能不会出现`segmentation fault`。但是，我们还是希望把这个提醒告诉程序员，因此在原有 `CStringChecker` 基础上增加了对 `malloc` 动态分配的指针的检测。
 
 ### 问题2
 **问题:** 请问 strcpy 的检查器中能否检查经过指针运算后的指针？
