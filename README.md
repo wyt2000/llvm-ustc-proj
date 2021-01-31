@@ -2,11 +2,9 @@
 
 ## 组员：范文，孙一鸣，吴钰同，刘逸菲
 ## 技术报告：
-- 必做： https://gitee.com/compiler_project/llvm-ustc-proj/blob/master/my-llvm-driver/docs/answer.md
-- 选做基础：https://gitee.com/compiler_project/llvm-ustc-proj/blob/master/sa/answer.md
-- 选做扩展：https://gitee.com/compiler_project/llvm-ustc-proj
-
-- PPT: https://gitee.com/compiler_project/llvm-ustc-proj/blob/master/final.pdf
+- [必做部分](https://github.com/wyt2000/llvm-ustc-proj/blob/master/my-llvm-driver/docs/answer.md)
+- [选做基础](https://github.com/wyt2000/llvm-ustc-proj/blob/master/sa/answer.md)
+- [选做扩展](https://github.com/wyt2000/llvm-ustc-proj/blob/master/sa/Checker.md)
 
 #### 注：以下内容为实验文档。
 # LLVM-USTC实践项目
@@ -26,13 +24,3 @@
 2.  2018年C++编码规范的缺陷检查[ CodingSpecChecker](https://gitee.com/s4plus/coding-spec-checker)：张宇翔、邓胜亮
 3.  2020年[LLVM驱动器框架](./my-llvm-driver)：刘硕、黄奕桐、王顺洪、陈铭瑜
 4.  2020年[MLIR选题](mlir-toy.md)：黄奕桐
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
